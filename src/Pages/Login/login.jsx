@@ -50,24 +50,31 @@ export function Login () {
       )
 
       const data = await response.json()
+console.log("LOGIN RESPONSE:", data) // keep this for debugging
 
-      if (!response.ok) {
-        setError(data.message || 'Login failed')
-        return
-      }
+if (!response.ok) {
+  setError(data.message || 'Login failed')
+  return
+}
 
-      // Save JWT token
-      localStorage.setItem('token', data.token)
+// backend can return token in 3 different places - handle all
+const token = data.token || data.data?.token || data.accessToken || data.data?.accessToken
+const student = data.student || data.data?.student || data.user || data.data?.user
 
-      // Save student information
-      localStorage.setItem(
-        'student',
-        JSON.stringify(data.student)
-      )
+if (!token) {
+  setError('Login succeeded but no token returned from server. Check backend.')
+  console.error('No token in:', data)
+  return
+}
 
-      navigate('/dashboard')
+localStorage.setItem('token', token)
+localStorage.setItem('student', JSON.stringify(student || {}))
+console.log("SAVED TOKEN:", token)
 
-    } catch (error) {
+navigate('/dashboard')
+
+    } 
+catch (error) {
       console.error('Login error:', error)
 
       setError(
