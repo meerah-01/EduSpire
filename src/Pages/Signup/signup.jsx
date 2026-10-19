@@ -43,7 +43,7 @@ export function Signup () {
       setLoading(true)
 
 const response = await fetch(
-        'http://eduspire-backend.onrender.com/api/auth/register',
+        'https://eduspire-backend.onrender.com/api/auth/register',
         {
    
              method: 'POST',
