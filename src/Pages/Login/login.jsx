@@ -36,7 +36,7 @@ export function Login () {
       setLoading(true)
 
       const response = await fetch(
-        'http://eduspire-backend.onrender.com/api/auth/login',
+        'https://eduspire-backend.onrender.com/api/auth/login',
         {
           method: 'POST',
           headers: {
