@@ -52,30 +52,27 @@ export function Login () {
       )
 
       const data = await response.json()
-console.log("LOGIN RESPONSE:", data) // keep this for debugging
+alert("RESPONSE: " + JSON.stringify(data).slice(0, 400))
 
 if (!response.ok) {
   setError(data.message || 'Login failed')
   return
 }
 
-// backend can return token in 3 different places - handle all
 const token = data.token || data.data?.token || data.accessToken || data.data?.accessToken
 const student = data.student || data.data?.student || data.user || data.data?.user
 
 if (!token) {
-  setError('Login succeeded but no token returned from server. Check backend.')
-  console.error('No token in:', data)
+  alert("NO TOKEN IN RESPONSE: " + JSON.stringify(data))
   return
 }
 
 localStorage.setItem('token', token)
 localStorage.setItem('student', JSON.stringify(student || {}))
-console.log("SAVED TOKEN:", token)
+alert("TOKEN SAVED OK")
 
 navigate('/dashboard')
 
-    } 
 catch (error) {
       console.error('Login error:', error)
 
