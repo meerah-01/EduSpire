@@ -42,10 +42,11 @@ export function Signup () {
     try {
       setLoading(true)
 
-      const response = await fetch(
+const response = await fetch(
         'http://localhost:3000/api/auth/register',
         {
-          method: 'POST',
+   
+             method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
