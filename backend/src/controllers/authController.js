@@ -1,6 +1,7 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const pool = require("../config/database");
+
+    import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import pool from '../config/database.js';
 
 const registerUser = async (req, res) => {
   try {
@@ -13,7 +14,7 @@ const registerUser = async (req, res) => {
     }
 
     const existingStudent = await pool.query(
-      "SELECT id FROM students WHERE email = $1",
+      'SELECT id FROM students WHERE email = $1',
       [email]
     );
 
@@ -24,7 +25,7 @@ const registerUser = async (req, res) => {
     }
 
     const program = await pool.query(
-      "SELECT id, name FROM programs WHERE id = $1",
+      'SELECT id, name FROM programs WHERE id = $1',
       [programId]
     );
 
@@ -38,56 +39,45 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const newStudent = await pool.query(
-      `INSERT INTO students
-       (full_name, email, password, program_id)
+      `INSERT INTO students (full_name, email, password, program_id)
        VALUES ($1, $2, $3, $4)
        RETURNING id, full_name, email, program_id, created_at`,
       [fullName, email, hashedPassword, programId]
     );
 
+    const student = newStudent.rows[0];
+
     return res.status(201).json({
       message: "Student registered successfully",
-      student: newStudent.rows[0]
+      student
     });
 
   } catch (error) {
     console.error("Registration error:", error);
-
     return res.status(500).json({
       message: "Server error while registering student"
     });
   }
 };
 
-
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check required fields
     if (!email || !password) {
       return res.status(400).json({
         message: "Email and password are required"
       });
     }
 
-    // Find student by email
     const result = await pool.query(
-      `SELECT
-        students.id,
-        students.full_name,
-        students.email,
-        students.password,
-        students.program_id,
-        programs.name AS program_name
+      `SELECT students.id, students.full_name, students.email, students.password, students.program_id, programs.name AS program_name
        FROM students
-       JOIN programs
-       ON students.program_id = programs.id
+       JOIN programs ON students.program_id = programs.id
        WHERE students.email = $1`,
       [email]
     );
 
-    // Check if student exists
     if (result.rows.length === 0) {
       return res.status(401).json({
         message: "Invalid email or password"
@@ -96,11 +86,7 @@ const loginUser = async (req, res) => {
 
     const student = result.rows[0];
 
-    // Compare password
-    const passwordMatch = await bcrypt.compare(
-      password,
-      student.password
-    );
+    const passwordMatch = await bcrypt.compare(password, student.password);
 
     if (!passwordMatch) {
       return res.status(401).json({
@@ -108,7 +94,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Create JWT
     const token = jwt.sign(
       {
         studentId: student.id,
@@ -133,15 +118,10 @@ const loginUser = async (req, res) => {
 
   } catch (error) {
     console.error("Login error:", error);
-
     return res.status(500).json({
       message: "Server error while logging in"
     });
   }
 };
 
-
-module.exports = {
-  registerUser,
-  loginUser
-};
+export { registerUser, loginUser };
